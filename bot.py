@@ -10,7 +10,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import anthropic
 
 # ========== НАСТРОЙКИ ==========
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+TELEGRAM_TOKEN = "7123456789:AAF_твой_токен_здесь"
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID")
 YOUR_CHAT_ID = int(os.environ.get("YOUR_CHAT_ID", "0"))
