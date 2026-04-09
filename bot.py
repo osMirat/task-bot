@@ -7,11 +7,10 @@ from google.oauth2.service_account import Credentials
 from telegram import Update
 from telegram.ext import Application, MessageHandler, CommandHandler, filters, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import anthropic
 
 # ========== НАСТРОЙКИ ==========
 TELEGRAM_TOKEN = "8626316824:AAGflK7iqjyp7-6cZdb8CUYE15dw88bQXnw"
-ANTHROPIC_API_KEY = "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"
+GEMINI_API_KEY = "AIzaSyDCYgEB9H-TNztXpR1vKr-Vjh2CKsXBgG0"
 SPREADSHEET_ID = "1Yuv91lSJLJClaUudYlgRqnlYNSMADxYTPlyepozAuYw"
 YOUR_CHAT_ID = 408480459
 
@@ -66,36 +65,49 @@ def mark_done(task_id: int):
 
 # ========== CLAUDE AI ==========
 def analyze_message(user_message: str) -> dict:
-    """Анализирует сообщение: задача это или нет, и есть ли дата"""
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-    
+    import urllib.request
     today = date.today().strftime("%d.%m.%Y")
     
-    response = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=500,
-        system=f"""Ты помощник по управлению задачами. Сегодня: {today}.
-Анализируй сообщение пользователя и отвечай ТОЛЬКО в формате JSON:
+    prompt = f"""Сегодня: {today}.
+Анализируй сообщение и отвечай ТОЛЬКО в формате JSON без markdown:
 {{
   "is_task": true/false,
   "task_text": "текст задачи",
   "has_date": true/false,
-  "due_date": "дата в формате ДД.ММ.ГГГГ или пустая строка",
+  "due_date": "дата ДД.ММ.ГГГГ или пустая строка",
   "needs_date_clarification": true/false,
-  "response": "твой ответ пользователю на русском"
+  "response": "ответ пользователю на русском"
 }}
+Сообщение: {user_message}"""
 
-Правила:
-- is_task=true если пользователь хочет добавить задачу/напоминание/дело
-- needs_date_clarification=true если это задача, но дата не указана и она уместна
-- response — дружелюбный ответ: подтверди сохранение или спроси дату""",
-        messages=[{"role": "user", "content": user_message}]
-    )
+    data = json.dumps({
+        "contents": [{"parts": [{"text": prompt}]}]
+    }).encode()
     
-    text = response.content[0].text
-    # убираем возможные markdown-теги
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+    
+    with urllib.request.urlopen(req) as resp:
+        result = json.loads(resp.read())
+    
+    text = result["candidates"][0]["content"]["parts"][0]["text"]
     text = text.replace("```json", "").replace("```", "").strip()
     return json.loads(text)
+
+
+def get_ai_response(prompt: str) -> str:
+    import urllib.request
+    data = json.dumps({
+        "contents": [{"parts": [{"text": f"Ты помощник по задачам. Отвечай кратко на русском.\n{prompt}"}]}]
+    }).encode()
+    
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+    
+    with urllib.request.urlopen(req) as resp:
+        result = json.loads(resp.read())
+    
+    return result["candidates"][0]["content"]["parts"][0]["text"]
 
 def get_ai_response(prompt: str) -> str:
     """Обычный ответ от Claude для не-задачных сообщений"""
