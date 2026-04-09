@@ -66,6 +66,8 @@ def mark_done(task_id: int):
 # ========== CLAUDE AI ==========
 def analyze_message(user_message: str) -> dict:
     import urllib.request
+    import urllib.error
+    import time
     today = date.today().strftime("%d.%m.%Y")
     
     prompt = f"""Сегодня: {today}.
@@ -85,14 +87,20 @@ def analyze_message(user_message: str) -> dict:
     }).encode()
     
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
-    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
     
-    with urllib.request.urlopen(req) as resp:
-        result = json.loads(resp.read())
-    
-    text = result["candidates"][0]["content"]["parts"][0]["text"]
-    text = text.replace("```json", "").replace("```", "").strip()
-    return json.loads(text)
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req) as resp:
+                result = json.loads(resp.read())
+            text = result["candidates"][0]["content"]["parts"][0]["text"]
+            text = text.replace("```json", "").replace("```", "").strip()
+            return json.loads(text)
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < 2:
+                time.sleep(10)
+                continue
+            raise
 
 
 def get_ai_response(prompt: str) -> str:
