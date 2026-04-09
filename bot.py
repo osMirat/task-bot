@@ -11,17 +11,28 @@ import anthropic
 
 # ========== НАСТРОЙКИ ==========
 TELEGRAM_TOKEN = "8626316824:AAGflK7iqjyp7-6cZdb8CUYE15dw88bQXnw"
-ANTHROPIC_API_KEY = "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"
-SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID")
-YOUR_CHAT_ID = int(os.environ.get("YOUR_CHAT_ID", "0"))
+ANTHROPIC_API_KEY = "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"
+SPREADSHEET_ID = "1Yuv91lSJLJClaUudYlgRqnlYNSMADxYTPlyepozAuYw"
+YOUR_CHAT_ID = 408480459
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ========== GOOGLE SHEETS ==========
 def get_sheet():
-    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
-    creds_dict = json.loads(creds_json)
+    creds_dict = {
+        "type": "service_account",
+        "project_id": "my-project-assistant-492810",
+        "private_key_id": "c55f83b3bbd9bbb90dcf7f807369986c4ccd7067",
+        "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDLVobuCffaGfbp\nvh52KH4xzXWi2InQpW43Tu7s9o4RtJxhpIF/2zfC1V6hGvtUQWRATtRs8kQFiyeq\nm9A1Wm34AInKnE9IswQHBXMWcCTMaqz0BMrXEBJEm/k0ckueB7PS0hkrv6tyfgm9\nc9LBze5dfevWagRYJhII2qcBBN/p3nzDOO39p0LGbDJrFN/HUmAw0F1B2MoaBFTB\nX4qy1Qf2bS0CXZ4B5sZTUTFhw8yrkkeolwGBUEugjH4IEzX5gTucxgIMz1cVC+Qe\nChC8W87pWJHBMj5tg7NtKF2RKPGnanePgH7kjFRA38sY4KAklYjxfZJB21Ryqphu\nEGT4aN45AgMBAAECggEAA4QuNn+a9v1BSoQsfVlF6rvlhONpvrSdq1HaH+RDoLAW\n5DlhY+yj541OYvWB0yXZA05ZrhNNHytrjC/AR1aWVZZCIRbYPXxFsuQNPB4Zr3nz\nc7osJ9FHVO29lC1F0X3LRky2fWMwe9JiKLyQBc9Mh/ay1V+6o4DvtDzTwS4XETGX\n3A3Jzs21nc86FcbLWqdtaBovGPUNL4fYoStmWd5K+1xfjshvSxByhmx+TixMNUdh\nSlskXtcfU2P6PgSW6c0AMyhO2NSsjA89JXrFDgq7I88N3EHLyCy2R6InJ3S9emTw\nMHfR1Wz0QIqFAubCMfBWVGYehOo6HI7cb9U4w/W+4QKBgQD3T1lr2nqQXejfAobb\newPDj+/TuLkmRhkR8nVrzPYBG8TAqtkvzDRURDNJp8LdShDMUo6H0zfJPOwI8oAO\n0S2riitvlFc1iXW+5WXy8XJa+P3avioQurD+g2Lu7hDyfgHb8AEQATD0e8m+ol4N\ndtqsoDwtf2FDVfY0s5HTJhvvHwKBgQDSe6Hy8eQEvPP9WLHnDtdVDf7V7WG3RdTw\nDnTFKX2OAo8RRqcy/bygsflMUc+bTDcc+hOa9ss4VaD9+FLKwj87tR/Xe+PxMPsR\ne4VtHq/2YH+vCSISJcLK0i6D9Va7Spg2aUizk4SOt4JsN527eymiBik+IEZ8AMbW\neHaalwD/pwKBgQCovmaoVbmdOcaEK+gyZ7xIurSMRRVoDRpcCZCfDomodfcI80of\n9/iYqrRIBITMkxXlJEuGV9NPpxbyf+xqr8W2rx82EgRzTiieKU4ntyEs+4nSsEBp\ni8jq0GE34A6GNv4zwI4pCncJylD8lzMPgtJwSSDmdmy6EjRc/013wh/7RwKBgQCb\n0td0SkuqjlB7cJxUGJKl7zSIH7NFwTcBeVJNXIgNCCvueEXz5BEvTlLng3GU4Pm0\nRBcblDWiwRHss1hnryKtC0xFdPytZLual72RqTRPy+T7KmHE2Zu6F5xEKO9KvNCv\nB4bBGyb5mTW+8/WcBHQv9Su3SKGlz9Vklc4IaF5e5QKBgQDS/6diWLPbEvYSrr24\niN+bVdUB5G/apHS43w5CxEZJrw7EFG5EJIcmMN4Gk3aPLfRvTeE7Yw9iXGnpJLpq\nwsE8PsTzAAWOHMU9+Q8nx9KIKRfawO5DxX1Nsb9KMHnMjPaX06Th3W7zYWTW9PV+\nvLK0yejQbugWZI2MlCaUkfsHFg==\n-----END PRIVATE KEY-----\n",
+        "client_email": "my-project-assistant@my-project-assistant-492810.iam.gserviceaccount.com",
+        "client_id": "107294993902256940327",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/my-project-assistant%40my-project-assistant-492810.iam.gserviceaccount.com",
+        "universe_domain": "googleapis.com"
+    }
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
     creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
     client = gspread.authorize(creds)
