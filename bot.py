@@ -11,7 +11,7 @@ import anthropic
 
 # ========== НАСТРОЙКИ ==========
 TELEGRAM_TOKEN = "8626316824:AAGflK7iqjyp7-6cZdb8CUYE15dw88bQXnw"
-ANTHROPIC_API_KEY = "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"
+ANTHROPIC_API_KEY = "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"
 SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID")
 YOUR_CHAT_ID = int(os.environ.get("YOUR_CHAT_ID", "0"))
 
